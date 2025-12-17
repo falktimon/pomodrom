@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Pomodoro Timer
+# Usage: ./pomodoro.sh [work_minutes] [break_minutes] [long_break_minutes] [sessions_until_long_break]
+
+# Default values
+WORK_TIME=${1:-25}
+SHORT_BREAK=${2:-5}
+LONG_BREAK=${3:-15}
+SESSIONS_UNTIL_LONG=${4:-4}
+
+session_count=0
+
+# Function to display time in MM:SS format
+format_time() {
+    local total_seconds=$1
+    local minutes=$((total_seconds / 60))
+    local seconds=$((total_seconds % 60))
+    printf "%02d:%02d" $minutes $seconds
+}
+
+# Countdown timer function
+countdown() {
+    local duration=$1
+    local label=$2
+    local total_seconds=$((duration * 60))
+    
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  $label"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    while [ $total_seconds -gt 0 ]; do
+        echo -ne "\r  ⏱  $(format_time $total_seconds) remaining"
+        sleep 1
+        ((total_seconds--))
+    done
+    
+    echo -e "\r  ✓ $label complete!              "
+    echo ""
+    
+    # Bell sound (if terminal supports it)
+    echo -e "\a"
+}
+
+# Main loop
+echo "🍅 Pomodrom"
+echo "Work: ${WORK_TIME}min | Short Break: ${SHORT_BREAK}min | Long Break: ${LONG_BREAK}min"
+echo ""
+
+while true; do
+    echo -e "Select timer:\n"
+    echo "  1) Work session"
+    echo "  2) Short break"
+    echo "  3) Long break"
+    echo -e "  q) Quit\n"
+    echo -n "Choice: "
+    read -r choice
+    
+    case $choice in
+        1)
+            ((session_count++))
+            countdown $WORK_TIME "Work Session #$session_count"
+            ;;
+        2)
+            countdown $SHORT_BREAK "Short Break"
+            ;;
+        3)
+            countdown $LONG_BREAK "Long Break"
+            ;;
+        q|Q)
+            echo "Goodbye! 👋"
+            exit 0
+            ;;
+        *)
+            echo "Invalid choice. Please try again."
+            echo ""
+            ;;
+    esac
+done
